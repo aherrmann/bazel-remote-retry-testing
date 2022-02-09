@@ -1,0 +1,7 @@
+[submodule "bazel-patched"]
+	path = bazel-patched
+	url = git@github.com:aherrmann/bazel.git
+        branch = test-remote-retry
+[submodule "bazel-original"]
+	path = bazel-original
+	url = git@github.com:bazelbuild/bazel.git

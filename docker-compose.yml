@@ -1,0 +1,57 @@
+version: "3.3"
+services:
+  bazel-remote:
+    container_name: bazel-remote
+    ports:
+      - 8181:8181
+      - 9092:9092
+    image: buchgr/bazel-remote-cache:v2.3.3
+    command:
+      - --config_file
+      - /config.yaml
+    user: $USER_ID:$GROUP_ID
+    volumes:
+      - $PWD/bazel-remote-config.yaml:/config.yaml
+      - $PWD/bazel-remote-dir:/data:rw
+  nginx:
+    container_name: nginx
+    ports:
+      - 8183:8183
+    image: nginxinc/nginx-unprivileged:1.21.6
+    volumes:
+      - $PWD/nginx-dir:/data:rw
+      - $PWD/nginx-config.conf:/etc/nginx/templates/default.conf.template
+  toxiproxy:
+    container_name: toxiproxy
+    ports:
+      - 8182:8182
+      - 8184:8184
+      - 8474:8474
+      - 9093:9093
+    image: ghcr.io/shopify/toxiproxy:2.3.0
+    command:
+      - -host
+      - "0.0.0.0"
+      - -config
+      - /config.json
+    depends_on:
+      - bazel-remote
+      - nginx
+    volumes:
+      - $PWD/toxiproxy-config.json:/config.json
+  toxiproxy-configure:
+    build:
+      context: toxiproxy-configure
+    command:
+      - sh
+      - -c
+      - >
+        for toxic in bazel-remote-http bazel-remote-grpc nginx-http; do
+          $$TOXIPROXY_CLI toxic add -n limit -t limit_data --tox 0.75 -a bytes=1000000 $$toxic
+          $$TOXIPROXY_CLI toxic add -n reset -t reset_peer --tox 0.75 -a timeout=500 $$toxic
+        done
+    depends_on:
+      - toxiproxy
+    environment:
+      - TOXIPROXY_CLI=/toxiproxy-cli
+      - TOXIPROXY_URL=http://toxiproxy:8474

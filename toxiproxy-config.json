@@ -1,0 +1,20 @@
+[
+  {
+    "name": "bazel-remote-http",
+    "listen": "0.0.0.0:8182",
+    "upstream": "bazel-remote:8181",
+    "enabled": true
+  },
+  {
+    "name": "bazel-remote-grpc",
+    "listen": "0.0.0.0:9093",
+    "upstream": "bazel-remote:9092",
+    "enabled": true
+  },
+  {
+    "name": "nginx-http",
+    "listen": "0.0.0.0:8184",
+    "upstream": "nginx:8183",
+    "enabled": true
+  }
+]

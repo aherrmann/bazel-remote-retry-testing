@@ -1,0 +1,11 @@
+dir: /data
+max_size: 10
+
+host: 0.0.0.0
+# The port to use for HTTP/HTTPS:
+port: 8181
+# The port to use for gRPC:
+grpc_port: 9092
+
+# If supplied, controls the verbosity of the access logger ("none" or "all"):
+access_log_level: all
